@@ -1,0 +1,19 @@
+#include "../dsp_lecture.h"
+
+void add_vector_s1_q15_fast(int n, int16_t * dst, int16_t * src1, int16_t * src2)
+{
+    int vect_4_N_div = n - (n % 4);
+    int16x4_t buf1, buf2, sum_buf;
+    for (int i = 0; i < vect_4_N_div; i += 4) {
+        buf1 = vld1_s16(&src1[i]);
+        buf2 = vld1_s16(&src2[i]);
+        sum_buf = vhadd_s16(buf1, buf2);
+        vst1_s16(&dst[i], sum_buf);
+    }
+    
+    for (int i = vect_4_N_div; i < n; i++) {
+        int32_t sum = (int32_t)src1[i] + (int32_t)src2[i];
+        sum >>= 1;
+        dst[i] = (int16_t)sum;
+    }
+}
